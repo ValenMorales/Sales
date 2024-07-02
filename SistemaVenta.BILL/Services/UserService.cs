@@ -39,11 +39,17 @@ namespace SistemaVenta.BILL.Services
             }
         }
 
-        public Task<bool> delete(int id)
+        public async Task<bool> delete(int id)
         {
             try
             {
-
+                var foundUser = await _userRepository.Get(u => u.Id == id);
+                if (foundUser.Id == null)
+                    throw new TaskCanceledException("The user does not exist");
+                bool response = await _userRepository.Delete(foundUser);
+                if (response)
+                    throw new TaskCanceledException("The deletion was not possible");
+                return response;
             }
             catch
             {
@@ -65,11 +71,25 @@ namespace SistemaVenta.BILL.Services
             }
         }
 
-        public Task<UserDTO> update(UserDTO user)
+        public async Task<UserDTO> update(UserDTO user)
         {
             try
             {
+                var modelUser = _mapper.Map<User>(user);
+                var foundUser = await _userRepository.Get(u => u.Id == modelUser.Id);
+                if (foundUser == null)
+                    throw new TaskCanceledException("User not found");
 
+                foundUser.Name = modelUser.Name;
+                foundUser.Email = modelUser.Email;
+                foundUser.RoleId = modelUser.RoleId;
+                foundUser.Password = modelUser.Password;
+                foundUser.IsActive = modelUser.IsActive;
+
+                var response = await _userRepository.Update(_mapper.Map<User>(foundUser));
+
+                return response == null ? 
+                throw new TaskCanceledException("The edition was not possible") : _mapper.Map<UserDTO>(response);
             }
             catch
             {
@@ -84,7 +104,7 @@ namespace SistemaVenta.BILL.Services
                 var user = await _userRepository.GetAll(u =>
                 u.Email == email && u.Password == password);
                 if (user.FirstOrDefault() == null)
-                    throw new TaskCanceledException("The user does not exists")
+                    throw new TaskCanceledException("The user does not exists");
 
                 User returnUser = user.Include(role => role.Role).First();
                 return _mapper.Map<SessionDTO>(returnUser);

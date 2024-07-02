@@ -13,6 +13,8 @@ namespace SistemaVenta.DTO
         public int? ProductId { get; set; }
         public string? ProductDescription { get; set; }
 
+        public int? ClientId { get; set; }
+
         public string? ClientName { get; set; }
 
         public int? Cantity { get; set; }
