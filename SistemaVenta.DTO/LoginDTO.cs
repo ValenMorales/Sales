@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SistemaVenta.DTO
 {
-    internal class LoginDTO
+    public class LoginDTO
     {
 
         public string Email { get; set; }
